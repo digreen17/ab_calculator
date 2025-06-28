@@ -1,0 +1,4 @@
+streamlit==1.46.1
+pyarrow==7.0.0
+numpy==1.26.4
+watchdog==6.0.0
