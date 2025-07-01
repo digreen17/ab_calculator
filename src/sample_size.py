@@ -1,0 +1,24 @@
+from statsmodels.stats.power import tt_ind_solve_power, zt_ind_solve_power
+from typing import Literal
+import numpy as np
+def ttest(effect_size: float, alpha: float, power: float, alternative: Literal["two-sided", "larger", "smaller"]) -> int:
+    sample_size = tt_ind_solve_power(
+        effect_size=effect_size,
+        nobs1=None, 
+        alpha=alpha, 
+        power=power,
+        alternative=alternative,
+        ratio=1)
+    return int(np.ceil(sample_size))
+
+
+def ztest(effect_size: float, alpha: float, power: float, alternative: Literal["two-sided", "larger", "smaller"]) -> int:
+    sample_size = zt_ind_solve_power(
+        effect_size=effect_size,
+        nobs1=None, 
+        alpha=alpha, 
+        power=power,
+        alternative=alternative,
+        ratio=1)
+    return int(np.ceil(sample_size))
+# print(ttest(2.0, 0.05, 0.90, "two-sided"))
