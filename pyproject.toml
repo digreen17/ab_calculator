@@ -11,7 +11,8 @@ dependencies = [
     "streamlit (>=1.46.1,<2.0.0)",
     "pyarrow (==7.0)",
     "numpy (<2.0)",
-    "watchdog (>=6.0.0,<7.0.0)"
+    "watchdog (>=6.0.0,<7.0.0)",
+    "statsmodels (>=0.14.4,<0.15.0)"
 ]
 
 [tool.poetry]
