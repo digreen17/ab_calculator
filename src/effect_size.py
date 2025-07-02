@@ -1,7 +1,9 @@
 import numpy as np
 
 
-def eff_size_continuous(mde: float, mean: float, std_dev: float, is_skewed: bool) -> float:
+def eff_size_continuous(
+    mde: float, mean: float, std_dev: float, is_skewed: bool
+) -> float:
     if any(arg <= 0 for arg in (mde, mean, std_dev)):
         raise ValueError("All arguments should be positive")
     if is_skewed:
@@ -9,7 +11,6 @@ def eff_size_continuous(mde: float, mean: float, std_dev: float, is_skewed: bool
         std_dev = np.log1p(std_dev)
     eff_size = mde * mean / std_dev
     return eff_size
-
 
 
 def eff_size_binary(mde: float, p: float) -> float:
@@ -20,5 +21,3 @@ def eff_size_binary(mde: float, p: float) -> float:
     sigma_binary = np.sqrt(p * (1 - p))
     eff_size = mde / sigma_binary
     return eff_size
-
-
