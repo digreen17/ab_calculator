@@ -4,7 +4,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.effect_size import eff_size_binary, eff_size_continuous
-from src.solver import calc_power, calc_sample_size
+from src.solver import calc_power, calc_sample_size, calc_effect_size
+from src.mde import mde_continuous, mde_binary
 
 
 def common_inputs():
@@ -30,15 +31,15 @@ def common_inputs():
     return mde, power, alpha, alternative
 
 
-def continuous_inputs(mde: float):
+def continuous_inputs():
     mean = st.number_input("Mean", min_value=0.01)
     std_dev = st.number_input("Standard deviation", min_value=0.01)
     is_skewed = st.checkbox("Data is skewed?", value=False)
-    effect_size = eff_size_continuous(mde, mean, std_dev, is_skewed)
-    return effect_size, dict(mean=mean, std_dev=std_dev, is_skewed=is_skewed)
+    return dict(mean=mean, std_dev=std_dev, is_skewed=is_skewed)
 
 
-def binary_inputs(mde: float):
+
+def binary_inputs():
     p = st.number_input(
         "p - observed success rate",
         min_value=0.0,
@@ -46,8 +47,7 @@ def binary_inputs(mde: float):
         value=0.5,
         format="%.2f",
     )
-    effect_size = eff_size_binary(mde, p)
-    return effect_size, dict(p=p)
+    return dict(p=p)
 
 
 st.set_page_config(page_title="Sample-size calculator", layout="wide")
@@ -61,9 +61,12 @@ with main_col:
 
     with st.expander(f"{metric_type.capitalize()} metric parameters", expanded=True):
         if metric_type == "continuous":
-            effect_size, _ = continuous_inputs(mde)
+            block_widget = continuous_inputs()
+            effect_size = eff_size_continuous(mde, block_widget["mean"], block_widget["std_dev"], block_widget["is_skewed"])
         else:
-            effect_size, _ = binary_inputs(mde)
+            block_widget = binary_inputs()
+            effect_size = eff_size_binary(mde, block_widget["p"])
+
 
     sample_size = calc_sample_size(effect_size, alpha, power, alternative)
     total = sample_size * 2
@@ -77,34 +80,42 @@ with main_col:
 
 with chart_col:
     st.markdown("### Visualization")
-    st.info("📊 тут будет график")
-    n_grid = np.linspace(0.01, sample_size * 2, 1000, dtype=int)
-    power_curve = np.array(
-        [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
-    )
+    n_grid = np.linspace(10, sample_size * 2, 1000, dtype=int)
+    power_curve = [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
+    eff_size_curve = [calc_effect_size(n, alpha, power, alternative) for n in n_grid]
+    # st.write(eff_size_curve)
+    if metric_type == "continuous":
+        mde_curve = [mde_continuous(e, block_widget["mean"], block_widget["std_dev"], block_widget["is_skewed"]) * 100 for e in eff_size_curve]
+    else:
+        mde_curve = [mde_binary(e, block_widget["p"]) * 100 for e in eff_size_curve]
 
+   
     fig = go.Figure()
 
-    fig.add_trace(
-        go.Scatter(
-            x=n_grid,
-            y=power_curve,
-            name="Power",
-            mode="lines",
-            line=dict(width=3, color="royalblue"),
-        )
-    )
+    fig.add_trace(go.Scatter(x=n_grid, y=power_curve,
+                         name="Power", line=dict(width=3, color="royalblue")))
 
+
+    fig.add_trace(go.Scatter(x=n_grid, y=mde_curve,
+                         name="MDE (%)", line=dict(width=3, color="magenta"),
+                         yaxis="y2")) 
+    
+    
     fig.update_layout(
         xaxis_title="Sample size",
-        legend=dict(orientation="h", y=1.05, x=0.5, xanchor="center"),
+        yaxis=dict(title="Power", range=[0, 1]),
+        yaxis2=dict(title="MDE (%)",
+                    overlaying="y",           # наложить на первую
+                    side="right"),            # справа
+        legend_orientation="h"
     )
-
     fig.update_xaxes(showspikes=True, spikecolor="green",
                  spikethickness=2, spikedash="dash")   # вертикаль
     fig.update_yaxes(showspikes=True, spikecolor="green",
                  spikethickness=2, spikedash="dash")   # горизонталь
     # fig.update_layout(hovermode="x unified")               # единая подсветка по X
+
+
 
 
     st.plotly_chart(fig, use_container_width=True)

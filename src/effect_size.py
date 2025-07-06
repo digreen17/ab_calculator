@@ -5,7 +5,7 @@ def eff_size_continuous(
     mde: float, mean: float, std_dev: float, is_skewed: bool
 ) -> float:
     if any(arg <= 0 for arg in (mde, mean, std_dev)):
-        raise ValueError("All arguments should be positive")
+        raise ValueError(f"All arguments should be positive: {mde}, {mean}, {std_dev}")
     if is_skewed:
         mean = np.log1p(mean)
         std_dev = np.log1p(std_dev)

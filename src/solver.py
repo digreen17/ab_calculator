@@ -34,6 +34,22 @@ def calc_power(effect_size: float,
     )
     return power 
 
+
+def calc_effect_size(
+    nobs1: int, 
+    alpha: float,
+    power: float,
+    alternative: Literal["two-sided", "larger", "smaller"]) -> float:
+    effect_size = tt_ind_solve_power(
+        effect_size=None,
+        nobs1=nobs1,
+        alpha=alpha,
+        power=power,
+        alternative=alternative
+    )
+    return abs(effect_size)
+
+calc_effect_size(20, 0.5, 0.8, "two-sided") 
 # def calc_mde(
 #     nobs1: int,
 #     alpha: float,
