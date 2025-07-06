@@ -1,14 +1,16 @@
-import streamlit as st
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
 
 from src.effect_size import eff_size_binary, eff_size_continuous
-from src.sample_size import ttest
+from src.solver import calc_power, calc_sample_size
+
 
 def common_inputs():
     col1, col2 = st.columns(2)
     with col1:
-        mde_pct = st.slider("MDE (%)", min_value=1, max_value=99, value=3, step=1)
+        mde_pct = st.number_input("MDE (%)", min_value=1, max_value=99, value=3, step=1)
         mde = mde_pct / 100
     with col2:
         power = st.number_input(
@@ -21,7 +23,9 @@ def common_inputs():
             "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, format="%.5f"
         )
     with col4:
-        alternative = st.selectbox("Alternative hypothesis", ("two-sided", "larger", "smaller"))
+        alternative = st.selectbox(
+            "Alternative hypothesis", ("two-sided", "larger", "smaller")
+        )
 
     return mde, power, alpha, alternative
 
@@ -61,8 +65,8 @@ with main_col:
         else:
             effect_size, _ = binary_inputs(mde)
 
-    sample_size = ttest(effect_size, alpha, power, alternative)
-    total = sample_size * 2  
+    sample_size = calc_sample_size(effect_size, alpha, power, alternative)
+    total = sample_size * 2
 
     st.markdown("---")
     col_a, col_b = st.columns(2)
@@ -74,3 +78,33 @@ with main_col:
 with chart_col:
     st.markdown("### Visualization")
     st.info("📊 тут будет график")
+    n_grid = np.linspace(0.01, sample_size * 2, 1000, dtype=int)
+    power_curve = np.array(
+        [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
+    )
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=n_grid,
+            y=power_curve,
+            name="Power",
+            mode="lines",
+            line=dict(width=3, color="royalblue"),
+        )
+    )
+
+    fig.update_layout(
+        xaxis_title="Sample size",
+        legend=dict(orientation="h", y=1.05, x=0.5, xanchor="center"),
+    )
+
+    fig.update_xaxes(showspikes=True, spikecolor="green",
+                 spikethickness=2, spikedash="dash")   # вертикаль
+    fig.update_yaxes(showspikes=True, spikecolor="green",
+                 spikethickness=2, spikedash="dash")   # горизонталь
+    # fig.update_layout(hovermode="x unified")               # единая подсветка по X
+
+
+    st.plotly_chart(fig, use_container_width=True)
