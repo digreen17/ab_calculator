@@ -5,7 +5,9 @@ def mde_continuous(
     eff_size: float, mean: float, std_dev: float, is_skewed: bool
 ) -> float:
     if any(arg <= 0 for arg in (eff_size, mean, std_dev)):
-        raise ValueError(f"All arguments should be positive: {eff_size}, {mean}, {std_dev}")
+        raise ValueError(
+            f"All arguments should be positive: {eff_size}, {mean}, {std_dev}"
+        )
     if is_skewed:
         mean = np.log1p(mean)
         std_dev = np.log1p(std_dev)
