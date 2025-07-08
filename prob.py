@@ -1,11 +1,15 @@
+from collections.abc import Iterable
+
 import numpy as np
-import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
 from src.effect_size import eff_size_binary, eff_size_continuous
 from src.mde import mde_binary, mde_continuous
 from src.solver import calc_effect_size, calc_power, calc_sample_size
+
+N_GRID_MIN: int = 10
+N_GRID_POINTS: int = 1000
 
 
 def common_inputs():
@@ -21,7 +25,7 @@ def common_inputs():
     col3, col4 = st.columns(2)
     with col3:
         alpha = st.number_input(
-            "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, format="%.5f"
+            "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, format="%g"
         )
     with col4:
         alternative = st.selectbox(
@@ -35,7 +39,6 @@ def continuous_inputs():
     mean = st.number_input("Mean", min_value=0.01)
     std_dev = st.number_input("Standard deviation", min_value=0.01)
     is_skewed = st.checkbox("Data is skewed?", value=False)
-    # return dict(mean=mean, std_dev=std_dev, is_skewed=is_skewed)
     return mean, std_dev, is_skewed
 
 
@@ -47,8 +50,7 @@ def binary_inputs():
         value=0.5,
         format="%.2f",
     )
-    # return dict(p=p)
-    return p
+    return (p,)
 
 
 METRIC_HANDLERS = {
@@ -69,7 +71,10 @@ st.title("Sample‑size calculator")
 
 
 def create_power_mde_plot(
-    n_grid, power_curve: list[float], mde_curve: list[float], sample_size: int
+    n_grid: Iterable[int],
+    power_curve: list[float],
+    mde_curve: list[float],
+    sample_size: int,
 ) -> go.Figure:
     fig = go.Figure()
 
@@ -78,7 +83,8 @@ def create_power_mde_plot(
             x=n_grid,
             y=power_curve,
             name="Power",
-            line=dict(width=3, color="royalblue"),
+            line_color="royalblue",
+            line_width=3,
             customdata=mde_curve,
             hovertemplate=(
                 "Sample size: %{x:,.0f}<br>"
@@ -93,7 +99,8 @@ def create_power_mde_plot(
             x=n_grid,
             y=mde_curve,
             name="MDE (%)",
-            line=dict(width=3, color="magenta"),
+            line_width=3,
+            line_color="magenta",
             yaxis="y2",
             hovertemplate=(
                 "Sample size: %{x:,.0f}<br>" "MDE: %{y:.3f} %<extra></extra>"
@@ -109,7 +116,9 @@ def create_power_mde_plot(
         y1=1,
         xref="x",
         yref="paper",
-        line=dict(color="green", width=3, dash="dot"),
+        line_color="green",
+        line_width=3,
+        line_dash="dot",
         layer="above",
     )
 
@@ -145,16 +154,14 @@ with main_col:
 
     st.markdown("---")
     col_a, col_b = st.columns(2)
-    col_a.metric("Sample size per variant", f"{sample_size:,}")
+    col_a.metric("Sample size group", f"{sample_size:,}")
 
 
 with chart_col:
     st.markdown("### Visualization")
-    n_grid = np.linspace(10, sample_size * 2, 1000, dtype=int)
+    n_grid = np.linspace(N_GRID_MIN, sample_size * 2, N_GRID_POINTS, dtype=int)
     power_curve = [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
     eff_size_curve = [calc_effect_size(n, alpha, power, alternative) for n in n_grid]
-    # handler = METRIC_HANDLERS[metric_type]
-    # param = param
     mde_curve = [handler["mde"](e, *param) * 100 for e in eff_size_curve]
     fig = create_power_mde_plot(n_grid, power_curve, mde_curve, sample_size)
     st.plotly_chart(fig, use_container_width=True)
