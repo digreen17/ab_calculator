@@ -6,7 +6,7 @@ def mde_continuous(
 ) -> float:
     if any(arg <= 0 for arg in (eff_size, mean, std_dev)):
         raise ValueError(
-            f"All arguments should be positive: {eff_size}, {mean}, {std_dev}"
+            f"All arguments should be positive"
         )
     if is_skewed:
         mean = np.log1p(mean)
@@ -17,7 +17,7 @@ def mde_continuous(
 
 def mde_binary(eff_size: float, p: float) -> float:
     if eff_size <= 0:
-        raise ValueError("`mde` should be positive")
+        raise ValueError("`eff_size` should be positive")
     if p < 0 or p > 1:
         raise ValueError("`p` should be in range (0 ... 1)")
     sigma_binary = np.sqrt(p * (1 - p))
