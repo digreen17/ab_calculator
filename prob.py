@@ -67,35 +67,10 @@ METRIC_HANDLERS = {
 st.set_page_config(page_title="Sample-size calculator", layout="wide")
 st.title("Sample‑size calculator")
 
-main_col, chart_col = st.columns([1.3, 1])
 
-with main_col:
-    metric_type = st.selectbox("Metric type", ("continuous", "binary"))
-    mde, power, alpha, alternative = common_inputs()
-
-    with st.expander(f"{metric_type.capitalize()} metric parameters", expanded=True):
-        handler = METRIC_HANDLERS[metric_type]
-        param = handler["inputs"]()
-        effect_size = handler["effect_size"](mde, *param)
-
-    sample_size = calc_sample_size(effect_size, alpha, power, alternative)
-    total = sample_size * 2
-
-    st.markdown("---")
-    col_a, col_b = st.columns(2)
-    col_a.metric("Sample size per variant", f"{sample_size:,}")
-    col_b.metric("Total sample size (two groups)", f"{total:,}")
-
-
-with chart_col:
-    st.markdown("### Visualization")
-    n_grid = np.linspace(10, sample_size * 2, 1000, dtype=int)
-    power_curve = [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
-    eff_size_curve = [calc_effect_size(n, alpha, power, alternative) for n in n_grid]
-    handler = METRIC_HANDLERS[metric_type]
-    param = param
-    mde_curve = [handler["mde"](e, *param) * 100 for e in eff_size_curve]
-
+def create_power_mde_plot(
+    n_grid, power_curve: list[float], mde_curve: list[float], sample_size: int
+) -> go.Figure:
     fig = go.Figure()
 
     fig.add_trace(
@@ -152,4 +127,34 @@ with chart_col:
         showspikes=True, spikecolor="green", spikethickness=2, spikedash="dash"
     )
 
+    return fig
+
+
+main_col, chart_col = st.columns([1.3, 1])
+
+with main_col:
+    metric_type = st.selectbox("Metric type", ("continuous", "binary"))
+    mde, power, alpha, alternative = common_inputs()
+
+    with st.expander(f"{metric_type.capitalize()} metric parameters", expanded=True):
+        handler = METRIC_HANDLERS[metric_type]
+        param = handler["inputs"]()
+        effect_size = handler["effect_size"](mde, *param)
+
+    sample_size = calc_sample_size(effect_size, alpha, power, alternative)
+
+    st.markdown("---")
+    col_a, col_b = st.columns(2)
+    col_a.metric("Sample size per variant", f"{sample_size:,}")
+
+
+with chart_col:
+    st.markdown("### Visualization")
+    n_grid = np.linspace(10, sample_size * 2, 1000, dtype=int)
+    power_curve = [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
+    eff_size_curve = [calc_effect_size(n, alpha, power, alternative) for n in n_grid]
+    # handler = METRIC_HANDLERS[metric_type]
+    # param = param
+    mde_curve = [handler["mde"](e, *param) * 100 for e in eff_size_curve]
+    fig = create_power_mde_plot(n_grid, power_curve, mde_curve, sample_size)
     st.plotly_chart(fig, use_container_width=True)
