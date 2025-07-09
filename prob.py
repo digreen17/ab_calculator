@@ -12,7 +12,7 @@ N_GRID_MIN: int = 10
 N_GRID_POINTS: int = 1000
 
 
-def common_inputs():
+def common_inputs() -> tuple:
     col1, col2 = st.columns(2)
     with col1:
         mde_pct = st.number_input("MDE (%)", min_value=1, max_value=99, value=3, step=1)
@@ -35,14 +35,14 @@ def common_inputs():
     return mde, power, alpha, alternative
 
 
-def continuous_inputs():
+def continuous_inputs() -> tuple:
     mean = st.number_input("Mean", min_value=0.01)
     std_dev = st.number_input("Standard deviation", min_value=0.01)
     is_skewed = st.checkbox("Data is skewed?", value=False)
     return mean, std_dev, is_skewed
 
 
-def binary_inputs():
+def binary_inputs() -> tuple:
     p = st.number_input(
         "p - observed success rate",
         min_value=0.0,
@@ -72,8 +72,8 @@ st.title("Sample‑size calculator")
 
 def create_power_mde_plot(
     n_grid: Iterable[int],
-    power_curve: list[float],
-    mde_curve: list[float],
+    power_curve: Iterable[float],
+    mde_curve: Iterable[float],
     sample_size: int,
 ) -> go.Figure:
     fig = go.Figure()
@@ -139,7 +139,7 @@ def create_power_mde_plot(
     return fig
 
 
-main_col, chart_col = st.columns([1.3, 1])
+main_col, chart_col = st.columns([1.5, 1])
 
 with main_col:
     metric_type = st.selectbox("Metric type", ("continuous", "binary"))
@@ -152,13 +152,11 @@ with main_col:
 
     sample_size = calc_sample_size(effect_size, alpha, power, alternative)
 
-    st.markdown("---")
-    col_a, col_b = st.columns(2)
-    col_a.metric("Sample size group", f"{sample_size:,}")
+    st.markdown(f"## Sample size:&nbsp;&nbsp;:red[**{sample_size:,}**]")
 
 
 with chart_col:
-    st.markdown("### Visualization")
+    st.markdown("## Visualization")
     n_grid = np.linspace(N_GRID_MIN, sample_size * 2, N_GRID_POINTS, dtype=int)
     power_curve = [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
     eff_size_curve = [calc_effect_size(n, alpha, power, alternative) for n in n_grid]
