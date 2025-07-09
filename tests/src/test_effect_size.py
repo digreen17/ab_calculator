@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 from src.effect_size import eff_size_binary, eff_size_continuous
-from src.mde import mde_binary, mde_continuous
 
 
 class TestEffSizeContinuous:

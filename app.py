@@ -9,13 +9,13 @@ from src.mde import mde_binary, mde_continuous
 from src.solver import calc_effect_size, calc_power, calc_sample_size
 
 N_GRID_MIN: int = 10
-N_GRID_POINTS: int = 1000
+N_GRID_POINTS: int = 100
 
 
 def common_inputs() -> tuple:
     col1, col2 = st.columns(2)
     with col1:
-        mde_pct = st.number_input("MDE (%)", min_value=1, max_value=99, value=3, step=1)
+        mde_pct = st.number_input("MDE (%)", min_value=1.0, max_value=99.0, value=3.0)
         mde = mde_pct / 100
     with col2:
         power = st.number_input(
@@ -139,7 +139,7 @@ def create_power_mde_plot(
     return fig
 
 
-main_col, chart_col = st.columns([1.5, 1])
+main_col, chart_col = st.columns([1, 1.5])
 
 with main_col:
     metric_type = st.selectbox("Metric type", ("continuous", "binary"))
@@ -152,7 +152,7 @@ with main_col:
 
     sample_size = calc_sample_size(effect_size, alpha, power, alternative)
 
-    st.markdown(f"## Sample size:&nbsp;&nbsp;:red[**{sample_size:,}**]")
+    st.markdown(f"## Minimum sample size:&nbsp;&nbsp;**{sample_size:,}**")
 
 
 with chart_col:
