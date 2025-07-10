@@ -13,26 +13,20 @@ N_GRID_POINTS: int = 100
 
 
 def common_inputs() -> tuple:
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
-        mde_pct = st.number_input("MDE (%)", min_value=1.0, max_value=99.0, value=3.0)
+        mde_pct = st.number_input("MDE (%)", min_value=0.01, max_value=99.0, value=3.0, step=1.0)
         mde = mde_pct / 100
     with col2:
         power = st.number_input(
-            "Power (1 - β)", min_value=0.01, max_value=0.99, value=0.80, format="%.2f"
+            "Power (1 - β)", min_value=0.01, max_value=0.99, value=0.80, step=0.1, format="%.2f"
         )
-
-    col3, col4 = st.columns(2)
     with col3:
         alpha = st.number_input(
-            "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, format="%g"
-        )
-    with col4:
-        alternative = st.selectbox(
-            "Alternative hypothesis", ("two-sided", "larger", "smaller")
+            "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, step=0.01, format="%g"
         )
 
-    return mde, power, alpha, alternative
+    return mde, power, alpha
 
 
 def continuous_inputs() -> tuple:
@@ -48,6 +42,7 @@ def binary_inputs() -> tuple:
         min_value=0.0,
         max_value=1.0,
         value=0.5,
+        step=0.1,
         format="%.2f",
     )
     return (p,)
@@ -123,7 +118,7 @@ def create_power_mde_plot(
     )
 
     fig.update_layout(
-        xaxis_title="Sample size",
+        xaxis_title="Sample size", 
         yaxis=dict(title="Power", range=[0, 1]),
         yaxis2=dict(title="MDE (%)", overlaying="y", side="right", range=[0, 100]),
         legend=dict(orientation="h", x=0.9, y=-0.2, xanchor="center", yanchor="top"),
@@ -143,23 +138,30 @@ main_col, chart_col = st.columns([1, 1.5])
 
 with main_col:
     metric_type = st.selectbox("Metric type", ("continuous", "binary"))
-    mde, power, alpha, alternative = common_inputs()
+    mde, power, alpha = common_inputs()
 
     with st.expander(f"{metric_type.capitalize()} metric parameters", expanded=True):
         handler = METRIC_HANDLERS[metric_type]
         param = handler["inputs"]()
         effect_size = handler["effect_size"](mde, *param)
 
-    sample_size = calc_sample_size(effect_size, alpha, power, alternative)
+    sample_size = calc_sample_size(effect_size, alpha, power)
 
     st.markdown(f"## Minimum sample size:&nbsp;&nbsp;**{sample_size:,}**")
 
-
 with chart_col:
     st.markdown("## Visualization")
-    n_grid = np.linspace(N_GRID_MIN, sample_size * 2, N_GRID_POINTS, dtype=int)
-    power_curve = [calc_power(effect_size, n, alpha, alternative) for n in n_grid]
-    eff_size_curve = [calc_effect_size(n, alpha, power, alternative) for n in n_grid]
+
+    if "n_grid_max" not in st.session_state:
+        st.session_state["n_grid_max"] = sample_size * 2
+    else:
+        too_close = sample_size > 0.9 * st.session_state["n_grid_max"]
+        if too_close:
+            st.session_state["n_grid_max"] = int(sample_size / 0.8)
+    n_grid_max = st.session_state["n_grid_max"]
+    n_grid = np.linspace(N_GRID_MIN, n_grid_max, N_GRID_POINTS, dtype=int).tolist()
+    power_curve = [calc_power(effect_size, n, alpha) for n in n_grid]
+    eff_size_curve = [calc_effect_size(n, alpha, power) for n in n_grid]
     mde_curve = [handler["mde"](e, *param) * 100 for e in eff_size_curve]
     fig = create_power_mde_plot(n_grid, power_curve, mde_curve, sample_size)
     st.plotly_chart(fig, use_container_width=True)
