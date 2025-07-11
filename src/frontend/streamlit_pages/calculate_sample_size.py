@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -169,10 +170,21 @@ with chart_col:
         too_close = sample_size > 0.9 * st.session_state["n_grid_max"]
         if too_close:
             st.session_state["n_grid_max"] = int(sample_size / 0.8)
+
     n_grid_max = st.session_state["n_grid_max"]
     n_grid = generate_threshold_distribution(N_GRID_MIN, n_grid_max, N_GRID_POINTS)
     power_curve = [calc_power(effect_size, n, alpha) for n in n_grid]
     eff_size_curve = [calc_effect_size(n, alpha, power) for n in n_grid]
     mde_curve = [handler["mde"](e, *param) * 100 for e in eff_size_curve]
-    fig = create_power_mde_plot(n_grid, power_curve, mde_curve, sample_size)
+
+    df = pd.DataFrame(
+        {
+            "n": n_grid,
+            "power": power_curve,
+            "mde": mde_curve,
+        }
+    )
+    df = df.dropna()
+
+    fig = create_power_mde_plot(df["n"], df["power"], df["mde"], sample_size)
     st.plotly_chart(fig, use_container_width=True)
