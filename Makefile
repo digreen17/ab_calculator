@@ -15,3 +15,7 @@ format:
 .PHONY: test
 test:
 	pytest tests
+
+.PHONY: run
+run:
+	streamlit run src/frontend/ui.py
