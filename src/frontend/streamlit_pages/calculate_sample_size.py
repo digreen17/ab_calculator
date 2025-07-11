@@ -149,6 +149,17 @@ with main_col:
 
     st.markdown(f"## Minimum sample size:&nbsp;&nbsp;**{sample_size:,}**")
 
+def generate_threshold_distribution(n_min, n_max, n_points, ratio = 0.5, left_density=0.7):
+    n_left = int(n_points * left_density)
+    n_right = n_points - n_left
+
+    x_threshold = int(ratio * n_max)
+    
+    left_points = np.linspace(n_min, x_threshold, n_left)
+    right_points = np.linspace(x_threshold, n_max, n_right + 1)[1:] 
+    
+    return np.concatenate([left_points, right_points]).astype(int).tolist()
+
 with chart_col:
     st.markdown("## Visualization")
 
@@ -159,7 +170,7 @@ with chart_col:
         if too_close:
             st.session_state["n_grid_max"] = int(sample_size / 0.8)
     n_grid_max = st.session_state["n_grid_max"]
-    n_grid = np.linspace(N_GRID_MIN, n_grid_max, N_GRID_POINTS, dtype=int).tolist()
+    n_grid = generate_threshold_distribution(N_GRID_MIN, n_grid_max, N_GRID_POINTS)
     power_curve = [calc_power(effect_size, n, alpha) for n in n_grid]
     eff_size_curve = [calc_effect_size(n, alpha, power) for n in n_grid]
     mde_curve = [handler["mde"](e, *param) * 100 for e in eff_size_curve]
