@@ -16,15 +16,27 @@ N_GRID_POINTS: int = 100
 def common_inputs() -> tuple:
     col1, col2, col3 = st.columns(3)
     with col1:
-        mde_pct = st.number_input("MDE (%)", min_value=0.01, max_value=99.0, value=3.0, step=1.0)
+        mde_pct = st.number_input(
+            "MDE (%)", min_value=0.01, max_value=99.0, value=3.0, step=1.0
+        )
         mde = mde_pct / 100
     with col2:
         power = st.number_input(
-            "Power (1 - β)", min_value=0.01, max_value=0.99, value=0.80, step=0.1, format="%.2f"
+            "Power (1 - β)",
+            min_value=0.01,
+            max_value=0.99,
+            value=0.80,
+            step=0.1,
+            format="%.2f",
         )
     with col3:
         alpha = st.number_input(
-            "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, step=0.01, format="%g"
+            "Alpha (α)",
+            min_value=0.00001,
+            max_value=0.99,
+            value=0.05,
+            step=0.01,
+            format="%g",
         )
 
     return mde, power, alpha
@@ -119,7 +131,7 @@ def create_power_mde_plot(
     )
 
     fig.update_layout(
-        xaxis_title="Sample size", 
+        xaxis_title="Sample size",
         yaxis=dict(title="Power", range=[0, 1]),
         yaxis2=dict(title="MDE (%)", overlaying="y", side="right", range=[0, 100]),
         legend=dict(orientation="h", x=0.9, y=-0.2, xanchor="center", yanchor="top"),
@@ -150,16 +162,20 @@ with main_col:
 
     st.markdown(f"## Minimum sample size:&nbsp;&nbsp;**{sample_size:,}**")
 
-def generate_threshold_distribution(n_min, n_max, n_points, ratio = 0.5, left_density=0.7):
+
+def generate_threshold_distribution(
+    n_min, n_max, n_points, ratio=0.5, left_density=0.7
+):
     n_left = int(n_points * left_density)
     n_right = n_points - n_left
 
     x_threshold = int(ratio * n_max)
-    
+
     left_points = np.linspace(n_min, x_threshold, n_left)
-    right_points = np.linspace(x_threshold, n_max, n_right + 1)[1:] 
-    
+    right_points = np.linspace(x_threshold, n_max, n_right + 1)[1:]
+
     return np.concatenate([left_points, right_points]).astype(int).tolist()
+
 
 with chart_col:
     st.markdown("## Visualization")

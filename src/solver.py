@@ -1,6 +1,7 @@
 import numpy as np
 from statsmodels.stats.power import tt_ind_solve_power
 
+
 def calc_sample_size(
     effect_size: float,
     alpha: float,

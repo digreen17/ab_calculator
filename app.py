@@ -15,15 +15,27 @@ N_GRID_POINTS: int = 100
 def common_inputs() -> tuple:
     col1, col2, col3 = st.columns(3)
     with col1:
-        mde_pct = st.number_input("MDE (%)", min_value=0.01, max_value=99.0, value=3.0, step=1.0)
+        mde_pct = st.number_input(
+            "MDE (%)", min_value=0.01, max_value=99.0, value=3.0, step=1.0
+        )
         mde = mde_pct / 100
     with col2:
         power = st.number_input(
-            "Power (1 - β)", min_value=0.01, max_value=0.99, value=0.80, step=0.1, format="%.2f"
+            "Power (1 - β)",
+            min_value=0.01,
+            max_value=0.99,
+            value=0.80,
+            step=0.1,
+            format="%.2f",
         )
     with col3:
         alpha = st.number_input(
-            "Alpha (α)", min_value=0.00001, max_value=0.99, value=0.05, step=0.01, format="%g"
+            "Alpha (α)",
+            min_value=0.00001,
+            max_value=0.99,
+            value=0.05,
+            step=0.01,
+            format="%g",
         )
 
     return mde, power, alpha
@@ -118,7 +130,7 @@ def create_power_mde_plot(
     )
 
     fig.update_layout(
-        xaxis_title="Sample size", 
+        xaxis_title="Sample size",
         yaxis=dict(title="Power", range=[0, 1]),
         yaxis2=dict(title="MDE (%)", overlaying="y", side="right", range=[0, 100]),
         legend=dict(orientation="h", x=0.9, y=-0.2, xanchor="center", yanchor="top"),

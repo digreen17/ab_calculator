@@ -15,13 +15,13 @@ with col2:
     st.markdown("[LinkedIn](https://linkedin.com/in/yourprofile)")
     st.markdown("[Telegram](https://t.me/digreen_17)")
 
-st.markdown("---")  
+st.markdown("---")
 
 
 table_md = """
 ### Приложение включает в себя:
 
-#### 1. Sample-size calculator  
+#### 1. Sample-size calculator
 Калькулятор минимального числа наблюдений в каждой группе эксперимента.
 
 **Параметры ввода**
@@ -53,10 +53,9 @@ table_md = """
 st.markdown(table_md, unsafe_allow_html=True)
 
 
-
 st.markdown(
     """
-1. Заполните параметры выше.  
+1. Заполните параметры выше.
 2. Внизу появится значение **Minimum sample size** —
    минимальное число наблюдений в каждой группе.
 """
