@@ -6,3 +6,4 @@ sample_size  = st.Page("streamlit_pages/calculate_sample_size.py", title="Sample
 about = st.Page("streamlit_pages/about.py",      title="О проекте")
 
 current = st.navigation([about, sample_size], position="sidebar")   
+current.run() 
