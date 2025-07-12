@@ -1,36 +1,47 @@
-## Sample‑Size Calculator
+# Sample‑Size Calculator
 
-[Link to the app](https://abcalculator-nmf525vjrygaf9rpyabs39.streamlit.app/about)
+## Overview
 
----
+![streamlit_app](./references/streamlit_promo.png)
 
-The **Sample‑Size Calculator** determines the minimum number of observations required per experimental group for A/B testing.
+[Open live Streamlit app](https://abcalculator-nmf525vjrygaf9rpyabs39.streamlit.app/calculate_sample_size)
 
-### Core Parameters
 
-| Parameter   | Purpose                                |
-| ----------- | -------------------------------------- |
-| Metric type | Continuous or binary metric            |
-| MDE (%)     | Minimum detectable effect              |
-| Power (1−β) | Probability of detecting a true effect |
-| Alpha (α)   | Significance level                     |
+Sample size calculations for A/B tests. 
+Supports binary and continuous metrics.
+Built with Streamlit, Plotly, and a bit of statsmodels.
 
-### Additional Parameters
 
-#### Continuous Metric
 
-| Parameter          | Purpose                               |
-| ------------------ | ------------------------------------- |
-| Mean               | Expected average value                |
-| Standard deviation | Expected variability                  |
-| Data is skewed?    | Apply variance‑stabilizing correction |
+## Set up
 
-#### Binary Metric
+```bash
+pyenv local 3.10
+poetry install -E all
+```
 
-| Parameter | Purpose                      |
-| --------- | ---------------------------- |
-| p         | Baseline success probability |
+## Run locally
 
----
+```bash
+make run 
+```
+or
+```python
+streamlit run src/frontend/ui.py
+```
 
-**After entering the parameters, the calculator outputs the minimum sample size required per group.**
+The app opens at `http://localhost:8501`.
+
+## Development helpers
+
+| Command       | Action                                   |
+|---------------|------------------------------------------|
+| `make format` | Black + isort auto‑formatter             |
+| `make lint`   | flake8, Black, isort, mypy static checks |
+| `make test`   | Run unit tests with PyTest               |
+| `make run`    | Run app locally                          |
+
+
+## License
+
+Released under the [MIT License](LICENSE)
