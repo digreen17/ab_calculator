@@ -1,69 +1,95 @@
+import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="About")
+st.set_page_config(page_title="About", layout="centered")
+st.title("About")
+left, right = st.columns(2)
 
-st.title("О приложении")
+with left:
+    st.subheader("Repository")
+    github_col1, github_col2 = st.columns([0.07, 0.93])
+    with github_col1:
+        st.image(
+            "https://www.iconninja.com/files/328/954/550/github-icon.png", width=24
+        )
+    with github_col2:
+        st.markdown(
+            "[AB Calculator on GitHub](https://github.com/digreen17/ab_calculator)"
+        )
 
-col1, col2 = st.columns(2)
+with right:
+    st.subheader("Contact")
+    linkedin_col1, linkedin_col2 = st.columns([0.07, 0.93])
+    with linkedin_col1:
+        st.image(
+            "https://www.iconninja.com/files/272/300/55/linkedin-blue-linkedin-linkedin-logo-icon.png",
+            width=24,
+        )
+    with linkedin_col2:
+        st.markdown("[LinkedIn](https://linkedin.com/in/yourprofile)")
 
-with col1:
-    st.subheader("Ссылки на проект")
-    st.markdown("[Репозиторий проекта](https://github.com/digreen17/ab_calculator)")
-
-with col2:
-    st.subheader("Прочие ссылки")
-    st.markdown("[LinkedIn](https://linkedin.com/in/yourprofile)")
-    st.markdown("[Telegram](https://t.me/digreen_17)")
-
-st.markdown("---")  
-
-
-table_md = """
-### Приложение включает в себя:
-
-#### 1. Sample-size calculator  
-Калькулятор минимального числа наблюдений в каждой группе эксперимента.
-
-**Параметры ввода**
-
-| Поле | Что означает |
-|------|--------------|
-| **Metric type** | `continuous`  непрерывная метрика <br> `binary` бинарная метрика |
-| **MDE (%)** | Минимально детектируемый эффект в процентах |
-| **Power (1−β)** | Вероятность обнаружить эффект, если он существует |
-| **Alpha (α)** | Уровень статистической значимости  |
-
-Если выбран тип метрики **`continuous`** дополнительно укажите:
-
-| Поле | Что означает |
-|------|--------------|
-| **Mean** | ожидаемое среднее значение |
-| **Standard deviation**  | стандартное отклонение |
-
-Если распределение асимметрично, отметьте чекбокс **Data is skewed?** — расчёт применит поправку.
-
-Если выбран тип метрики **`binary`** дополнительно укажите:
-
-| Поле | Что означает |
-|------|--------------|
-| **p** | наблюдаемая вероятность успеха для бинарной метрики |
-
-"""
-
-st.markdown(table_md, unsafe_allow_html=True)
-
-
-
-st.markdown(
-    """
-1. Заполните параметры выше.  
-2. Внизу появится значение **Minimum sample size** —
-   минимальное число наблюдений в каждой группе.
-"""
-)
+    telegram_col1, telegram_col2 = st.columns([0.07, 0.93])
+    with telegram_col1:
+        st.image(
+            "https://www.iconninja.com/files/60/1019/664/telegram-icon.png", width=24
+        )
+    with telegram_col2:
+        st.markdown("[Telegram](https://t.me/digreen_17)")
 
 st.divider()
-col1, col2 = st.columns([2, 1])
-with col1:
-    st.subheader("Репозиторий проекта")
-    st.markdown("- [GitHub](https://github.com/digreen17/ab_calculator)")
+st.subheader("Sample‑Size Calculator")
+st.write(
+    "Determines the minimum number of observations required per experimental group."
+)
+
+core_params = pd.DataFrame(
+    {
+        "Parameter": [
+            "Metric type",
+            "MDE (%)",
+            "Power (1−β)",
+            "Alpha (α)",
+        ],
+        "Purpose": [
+            "continuous or binary metric",
+            "Minimum detectable effect",
+            "Probability of detecting a true effect",
+            "Significance level",
+        ],
+    }
+)
+st.write("#### Core parameters")
+st.table(core_params.set_index(core_params.columns[0]))
+
+st.write("#### Additional parameters")
+continuous_tab, binary_tab = st.tabs(["Continuous metric", "Binary metric"])
+
+with continuous_tab:
+    continuous_params = pd.DataFrame(
+        {
+            "Parameter": [
+                "Mean",
+                "Standard deviation",
+                "Data is skewed?",
+            ],
+            "Purpose": [
+                "Expected average value",
+                "Expected variability",
+                "Apply variance‑stabilising correction",
+            ],
+        }
+    )
+    st.table(continuous_params.set_index(continuous_params.columns[0]))
+
+with binary_tab:
+    binary_params = pd.DataFrame(
+        {
+            "Parameter": ["p"],
+            "Purpose": ["Baseline success probability"],
+        }
+    )
+    st.table(binary_params.set_index(binary_params.columns[0]))
+
+st.info(
+    "After entering the parameters, the calculator outputs the minimum sample size per group."
+)
