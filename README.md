@@ -1,6 +1,6 @@
 ## Sample‑Size Calculator
 
-[Link to the app](#)
+[Link to the app](https://abcalculator-nmf525vjrygaf9rpyabs39.streamlit.app/about)
 
 ---
 
