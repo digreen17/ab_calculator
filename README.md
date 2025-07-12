@@ -4,7 +4,7 @@
 
 ![streamlit_app](./references/streamlit_promo.png)
 
-[Open live Streamlit app](https://abcalculator-nmf525vjrygaf9rpyabs39.streamlit.app/calculate_sample_size)
+[Open live Streamlit app](https://abcalculator-app.streamlit.app/)
 
 
 Sample size calculations for A/B tests. 
