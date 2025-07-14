@@ -19,15 +19,6 @@ with left:
 
 with right:
     st.subheader("Contact")
-    linkedin_col1, linkedin_col2 = st.columns([0.07, 0.93])
-    with linkedin_col1:
-        st.image(
-            "https://www.iconninja.com/files/272/300/55/linkedin-blue-linkedin-linkedin-logo-icon.png",
-            width=24,
-        )
-    with linkedin_col2:
-        st.markdown("[LinkedIn](https://linkedin.com/in/yourprofile)")
-
     telegram_col1, telegram_col2 = st.columns([0.07, 0.93])
     with telegram_col1:
         st.image(
